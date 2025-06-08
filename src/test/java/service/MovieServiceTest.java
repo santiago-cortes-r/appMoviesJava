@@ -4,6 +4,8 @@ import data.MoviesRepository;
 import models.Genre;
 import models.Movie;
 import org.hamcrest.CoreMatchers;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -18,9 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MovieServiceTest {
 
-    @Test
-    void return_movies_by_genre() {
+    private MovieService movieService;
+
+    @BeforeEach
+    void setUp() {
         MoviesRepository moviesRepository = Mockito.mock(MoviesRepository.class);
+
         Mockito.when(moviesRepository.findAll()).thenReturn(
                 Arrays.asList(
                         new Movie(1, "Dark Knight", 152, Genre.ACTION),
@@ -33,12 +38,29 @@ class MovieServiceTest {
                 )
         );
 
-        MovieService movieService = new MovieService(moviesRepository);
+        movieService = new MovieService(moviesRepository);
+    }
+
+
+
+    @Test
+    void return_movies_by_genre() {
+
 
         Collection<Movie> movies = movieService.findMoviesByGenre(Genre.ACTION);
 
         List<Integer> moviesIds = movies.stream().map(movie -> movie.getId()).collect(Collectors.toList());
 
         assertThat(moviesIds, CoreMatchers.is(Arrays.asList(1,7)));
+    }
+
+    @Test
+    void return_movies_by_duration_time() {
+
+        Collection<Movie> movies = movieService.findMoviesByDuratinTime(113);
+
+        List<Integer> moviesDuration = movies.stream().map(movie -> movie.getId()).collect(Collectors.toList());
+
+        assertThat(moviesDuration, CoreMatchers.is(Arrays.asList(2,4,5,6)));
     }
 }
