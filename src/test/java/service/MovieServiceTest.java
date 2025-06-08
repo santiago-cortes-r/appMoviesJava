@@ -21,6 +21,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class MovieServiceTest {
 
     private MovieService movieService;
+    private static List<Integer> getMoviesIds(Collection<Movie> movies) {
+        List<Integer> moviesDuration = movies.stream().map(Movie::getId).collect(Collectors.toList());
+        return moviesDuration;
+    }
 
     @BeforeEach
     void setUp() {
@@ -49,9 +53,7 @@ class MovieServiceTest {
 
         Collection<Movie> movies = movieService.findMoviesByGenre(Genre.ACTION);
 
-        List<Integer> moviesIds = movies.stream().map(movie -> movie.getId()).collect(Collectors.toList());
-
-        assertThat(moviesIds, CoreMatchers.is(Arrays.asList(1,7)));
+        assertThat(getMoviesIds(movies), CoreMatchers.is(Arrays.asList(1,7)));
     }
 
     @Test
@@ -59,8 +61,9 @@ class MovieServiceTest {
 
         Collection<Movie> movies = movieService.findMoviesByDuratinTime(113);
 
-        List<Integer> moviesDuration = movies.stream().map(movie -> movie.getId()).collect(Collectors.toList());
 
-        assertThat(moviesDuration, CoreMatchers.is(Arrays.asList(2,4,5,6)));
+        assertThat(getMoviesIds(movies), CoreMatchers.is(Arrays.asList(2,4,5,6)));
     }
+
+
 }
