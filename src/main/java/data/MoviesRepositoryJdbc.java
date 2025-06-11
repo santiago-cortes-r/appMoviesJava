@@ -41,6 +41,14 @@ public class MoviesRepositoryJdbc implements MoviesRepository {
 
     }
 
+    public Collection<Movie> findByKeywordOeKeyChar(String s){
+
+          Object[] args = {s};
+
+         return jdbcTemplate.query("select * from movies where name like '%?%", movieMapper, args);
+    }
+
+
     private static RowMapper<Movie> movieMapper = (rs, rowNum) ->
             new Movie(
                     rs.getInt("id"),

@@ -102,4 +102,24 @@ class MoviesRepositoryIntegretionTest {
         assertEquals(112, movieFromDB.getMinutes());
         assertEquals(Genre.THRILLER, movieFromDB.getGenre());
     }
+
+    @Test
+    void load_movie_by_keywordOrKeyChar(){
+
+        List<Movie> moviesByKeyChar = new ArrayList<>(moviesRepositoryJdbc.findByKeywordOeKeyChar(m));
+
+        List<Movie> expectedMovies = Arrays.asList(
+                new Movie(2, "Memento", 113, Genre.THRILLER),
+                new Movie(3, "Matrix", 136, Genre.ACTION));
+        for (int i = 0; i < expectedMovies.size(); i++) {
+            assertEquals( expectedMovies.get(i).getId(), movies.get(i).getId());
+            assertEquals( expectedMovies.get(i).getName(), movies.get(i).getName());
+            assertEquals( expectedMovies.get(i).getMinutes(), movies.get(i).getMinutes());
+            assertEquals( expectedMovies.get(i).getGenre(), movies.get(i).getGenre());
+        }
+
+
+        // assertThat(movieKeyChar, is(new Movie(2,"Memento",113,Genre.THRILLER)));
+
+    }
 }
