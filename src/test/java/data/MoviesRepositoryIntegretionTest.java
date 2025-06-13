@@ -2,9 +2,6 @@ package data;
 
 import models.Genre;
 import models.Movie;
-import org.h2.tools.Script;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -12,13 +9,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 
-import javax.sql.DataSource;
-
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -32,6 +25,7 @@ class MoviesRepositoryIntegretionTest {
 
     @BeforeEach
     void setUp() throws SQLException {
+
         String dbName = "test" + System.nanoTime(); // Nombre único para cada test
         dataSource = new DriverManagerDataSource("jdbc:h2:mem:"+dbName+";MODE=MYSQL", "sa", "sa");
 
@@ -58,14 +52,15 @@ class MoviesRepositoryIntegretionTest {
 
         assertEquals(3, movies.size());
         List<Movie> expectedMovies = Arrays.asList(
-                new Movie(1, "Dark Knight", 152, Genre.ACTION),
-                new Movie(2, "Memento", 113, Genre.THRILLER),
-                new Movie(3, "Matrix", 136, Genre.ACTION));
+                new Movie(1, "Dark Knight", 152, Genre.ACTION, "carlos"),
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos"),
+                new Movie(3, "Matrix", 136, Genre.ACTION, "santiago"));
         for (int i = 0; i < expectedMovies.size(); i++) {
             assertEquals( expectedMovies.get(i).getId(), movies.get(i).getId());
             assertEquals( expectedMovies.get(i).getName(), movies.get(i).getName());
             assertEquals( expectedMovies.get(i).getMinutes(), movies.get(i).getMinutes());
             assertEquals( expectedMovies.get(i).getGenre(), movies.get(i).getGenre());
+            assertEquals(expectedMovies.get(i).getDirector(), movies.get(i).getDirector());
         }
 
 //      el assertThat compara el objecto completo a traves de su hash y por lo tanto al momento de un debug
@@ -86,13 +81,15 @@ class MoviesRepositoryIntegretionTest {
         assertEquals("Memento", movieFromDB.getName());
         assertEquals(113, movieFromDB.getMinutes());
         assertEquals(Genre.THRILLER, movieFromDB.getGenre());
+        assertEquals("carlos", movieFromDB.getDirector());
+
         // assertThat(movieFromDB, is(new Movie(2,"Memento",113,Genre.THRILLER)));
 
     }
 
     @Test
     void insert_movie() {
-        Movie movie = new Movie("Super 8", 112, Genre.THRILLER);
+        Movie movie = new Movie("Super 8", 112, Genre.THRILLER, "pepito");
         moviesRepositoryJdbc.saveOrUpdate(movie);
 
         Movie movieFromDB =  moviesRepositoryJdbc.findById(4);
@@ -101,25 +98,47 @@ class MoviesRepositoryIntegretionTest {
         assertEquals("Super 8", movieFromDB.getName());
         assertEquals(112, movieFromDB.getMinutes());
         assertEquals(Genre.THRILLER, movieFromDB.getGenre());
+        assertEquals("pepito", movieFromDB.getDirector());
     }
 
     @Test
     void load_movie_by_keywordOrKeyChar(){
 
-        List<Movie> moviesByKeyChar = new ArrayList<>(moviesRepositoryJdbc.findByKeywordOeKeyChar(m));
+        List<Movie> moviesByKeyChar = new ArrayList<>(moviesRepositoryJdbc.findByKeywordOrKeyChar("m"));
 
         List<Movie> expectedMovies = Arrays.asList(
-                new Movie(2, "Memento", 113, Genre.THRILLER),
-                new Movie(3, "Matrix", 136, Genre.ACTION));
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos"),
+                new Movie(3, "Matrix", 136, Genre.ACTION, "santiago"));
+
+        assertEquals(expectedMovies.size(), moviesByKeyChar.size(), "Size mismatch");
+
         for (int i = 0; i < expectedMovies.size(); i++) {
-            assertEquals( expectedMovies.get(i).getId(), movies.get(i).getId());
-            assertEquals( expectedMovies.get(i).getName(), movies.get(i).getName());
-            assertEquals( expectedMovies.get(i).getMinutes(), movies.get(i).getMinutes());
-            assertEquals( expectedMovies.get(i).getGenre(), movies.get(i).getGenre());
+            assertEquals( expectedMovies.get(i).getId(), moviesByKeyChar.get(i).getId());
+            assertEquals( expectedMovies.get(i).getName(), moviesByKeyChar.get(i).getName());
+            assertEquals( expectedMovies.get(i).getMinutes(), moviesByKeyChar.get(i).getMinutes());
+            assertEquals( expectedMovies.get(i).getGenre(), moviesByKeyChar.get(i).getGenre());
+            assertEquals( expectedMovies.get(i).getDirector(), moviesByKeyChar.get(i).getDirector());
         }
+         // assertThat(movieKeyChar, is(new Movie(2,"Memento",113,Genre.THRILLER)));
+    }
 
+    @Test
+    void findByDirector() {
 
-        // assertThat(movieKeyChar, is(new Movie(2,"Memento",113,Genre.THRILLER)));
+        List<Movie> moviesByDirector = new ArrayList<>(moviesRepositoryJdbc.findByDirector("carlos"));
 
+        List<Movie> expectedMovies = Arrays.asList(
+                new Movie(1, "Dark Knight", 152, Genre.ACTION, "carlos"),
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos"));
+
+        assertEquals(expectedMovies.size(), moviesByDirector.size(), "Size mismatch");
+
+        for (int i = 0; i < expectedMovies.size(); i++) {
+            assertEquals( expectedMovies.get(i).getId(), moviesByDirector.get(i).getId());
+            assertEquals( expectedMovies.get(i).getName(), moviesByDirector.get(i).getName());
+            assertEquals( expectedMovies.get(i).getMinutes(), moviesByDirector.get(i).getMinutes());
+            assertEquals( expectedMovies.get(i).getGenre(), moviesByDirector.get(i).getGenre());
+            assertEquals( expectedMovies.get(i).getDirector(), moviesByDirector.get(i).getDirector());
+        }
     }
 }

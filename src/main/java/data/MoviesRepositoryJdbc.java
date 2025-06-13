@@ -3,13 +3,9 @@ package data;
 import models.Genre;
 import models.Movie;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
 public class MoviesRepositoryJdbc implements MoviesRepository {
 
@@ -36,23 +32,37 @@ public class MoviesRepositoryJdbc implements MoviesRepository {
     @Override
     public void saveOrUpdate(Movie movie) {
 
-        jdbcTemplate.update("insert into movies (name, minutes, genre) values (?, ?, ?)",
-                movie.getName(), movie.getMinutes(), movie.getGenre().toString());
+        jdbcTemplate.update("insert into movies (name, minutes, genre, director) values (?, ?, ?, ?)",
+                movie.getName(), movie.getMinutes(), movie.getGenre().toString(), movie.getDirector());
 
     }
 
-    public Collection<Movie> findByKeywordOeKeyChar(String s){
+    public Collection<Movie> findByKeywordOrKeyChar(String s){
 
-          Object[] args = {s};
+         String value = "%"+s+"%";
 
-         return jdbcTemplate.query("select * from movies where name like '%?%", movieMapper, args);
+        return jdbcTemplate.query("SELECT * FROM movies WHERE LOWER(name) LIKE LOWER(?)", movieMapper, value);
+        // uso el lower debido que los test se corren con una db en memoria generada por h2 que no tiene
+        // la configuracion utf8_general_ci, por lo que es sensible a minusculas y mayusculas
+
     }
+    public Collection<Movie>  findByDirector(String director) {
 
+        String value = "%"+director+"%";
+
+        return jdbcTemplate.query("SELECT * FROM movies WHERE LOWER(director) LIKE LOWER(?)", movieMapper, value);
+    }
 
     private static RowMapper<Movie> movieMapper = (rs, rowNum) ->
             new Movie(
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getInt("minutes"),
-                    Genre.valueOf(rs.getString("genre")));
+                    Genre.valueOf(rs.getString("genre")),
+                    rs.getString("director"));
 }
+
+
+
+
+

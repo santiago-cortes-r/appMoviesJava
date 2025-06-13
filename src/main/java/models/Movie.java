@@ -8,16 +8,24 @@ public class Movie {
     private String name;
     private int minutes;
     private Genre genre;
+    private String director;
 
-    public Movie(String name, int minutes,Genre genre){
-        this(null, name, minutes, genre);
+
+
+    public Movie(String name, int minutes, Genre genre, String direct){
+        this(null, name, minutes, genre, direct);
     }
 
-    public Movie(Integer id, String name, int minutes, Genre genre) {
+    public Movie(Integer id, String name, int minutes, Genre genre, String director) {
         this.id = id;
         this.name = name;
         this.minutes = minutes;
         this.genre = genre;
+        this.director = director;
+    }
+
+    public String getDirector() {
+        return director;
     }
 
     public Integer getId() {
