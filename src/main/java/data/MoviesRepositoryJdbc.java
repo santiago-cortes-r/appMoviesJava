@@ -53,6 +53,38 @@ public class MoviesRepositoryJdbc implements MoviesRepository {
         return jdbcTemplate.query("SELECT * FROM movies WHERE LOWER(director) LIKE LOWER(?)", movieMapper, value);
     }
 
+    public Collection<Movie> findByGenreAndMaxDuration(Genre genre, int maxMinutes) {
+        return jdbcTemplate.query(
+                "SELECT * FROM movies WHERE genre = ? AND minutes <= ?",
+                movieMapper,
+                genre.toString(),
+                maxMinutes
+        );
+    }
+
+    public Collection<Movie> findByDirectorAndMaxDuration(String director, int maxMinutes) {
+        String value = "%" + director + "%";
+        return jdbcTemplate.query(
+                "SELECT * FROM movies WHERE LOWER(director) LIKE LOWER(?) AND minutes <= ?",
+                movieMapper,
+                value,
+                maxMinutes
+        );
+    }
+
+    public Collection<Movie> findByDirectorAndGenre(String director, Genre genre) {
+        String value = "%" + director + "%";
+        return jdbcTemplate.query(
+                "SELECT * FROM movies WHERE LOWER(director) LIKE LOWER(?) AND genre = ?",
+                movieMapper,
+                value,
+                genre.toString()
+        );
+    }
+
+
+
+
     private static RowMapper<Movie> movieMapper = (rs, rowNum) ->
             new Movie(
                     rs.getInt("id"),

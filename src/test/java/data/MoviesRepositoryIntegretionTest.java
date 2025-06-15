@@ -141,4 +141,51 @@ class MoviesRepositoryIntegretionTest {
             assertEquals( expectedMovies.get(i).getDirector(), moviesByDirector.get(i).getDirector());
         }
     }
+
+    @Test
+    void find_movies_by_genre_and_max_duration() {
+        List<Movie> result = new ArrayList<>(moviesRepositoryJdbc.findByGenreAndMaxDuration(Genre.THRILLER, 115));
+
+        List<Movie> expected = List.of(
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos")
+        );
+
+        assertEquals(expected.size(), result.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).getId(), result.get(i).getId());
+            assertEquals(expected.get(i).getName(), result.get(i).getName());
+            assertEquals(expected.get(i).getMinutes(), result.get(i).getMinutes());
+            assertEquals(expected.get(i).getGenre(), result.get(i).getGenre());
+            assertEquals(expected.get(i).getDirector(), result.get(i).getDirector());
+        }
+    }
+
+    @Test
+    void find_movies_by_director_and_max_duration() {
+        List<Movie> result = new ArrayList<>(moviesRepositoryJdbc.findByDirectorAndMaxDuration("carlos", 115) );
+
+        List<Movie> expected = List.of(
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos")
+        );
+
+        assertEquals(expected.size(), result.size());
+        // Comparación de campos...
+    }
+
+    @Test
+    void find_movies_by_director_and_genre() {
+        List<Movie> result = new ArrayList<>(moviesRepositoryJdbc.findByDirectorAndGenre("carlos", Genre.THRILLER));
+
+        List<Movie> expected = List.of(
+                new Movie(2, "Memento", 113, Genre.THRILLER, "carlos")
+        );
+
+        assertEquals(expected.size(), result.size());
+        // Comparación de campos...
+    }
+
+
+
+
+
 }
